@@ -4,7 +4,7 @@ from pinecone import ServerlessSpec
 import time
 from tqdm.auto import tqdm
 import json
-import pandas as pd
+
 
 
 #Load APi KEY
