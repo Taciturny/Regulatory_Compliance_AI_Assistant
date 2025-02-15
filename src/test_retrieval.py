@@ -6,7 +6,6 @@ from sentence_transformers import SentenceTransformer
 
 #Load APi KEY
 api_key = os.environ.get("PINECONE_API_KEY")
-print(api_key)
 
 #configure Pinecone client
 pc = Pinecone(api_key=api_key)
