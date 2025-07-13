@@ -28,6 +28,19 @@ When answering, follow these steps:
     3. Provide a well-structured, easy-to-understand response.
     4. If the query requires clarification or is beyond the given context, politely guide the user towards additional resources.
 
+Check this Examples and use as a Guide in responding
+Examples:
+    Question:
+    Does the NDPA require organizations to notify individuals when collecting their personal data?
+    Answer:
+    Yes, the NDPA requires organizations to provide individuals with clear notice before collecting their personal data. This includes informing them about the purpose of data collection, their rights, and how the data will be processed and stored. Transparency is a key principle under the NDPA.
+    
+    Question:
+    Here’s a section of the NDPA: “Every data controller shall take appropriate technical and organizational measures to ensure the security and confidentiality of personal data.”
+    What does this mean in practice?
+    Answer:
+    This section emphasizes the responsibility of data controllers to implement safeguards—both technical (like encryption) and organizational (like access control policies)—to protect personal data from unauthorized access, loss, or misuse. It reinforces the NDPA's commitment to privacy and security by design.
+
 Question:
 {query}
 
@@ -50,6 +63,17 @@ Avoid using the context provided in the conversation history to answer the quest
 Avoid unnecessary jargon or complex language.
 Just provide a simple and clear response.
 Go straight to the point and avoid lengthy explanations.
+
+
+Check this Examples and use as a Guide in responding
+Examples:
+    Question:
+    Hi, I hope you're doing well! Just wanted to say thanks for the help earlier.
+    Answer:
+    You're very welcome! I'm glad I could assist. If you have any questions about data protection or the NDPA, feel free to ask.
+    Question:
+    Can you explain what data protection is?
+    Answer:Sure! Data protection refers to laws and practices that safeguard people's personal information from misuse. In Nigeria, the NDPA helps ensure that individuals have control over how their data is collected, used, and shared.
 
 The history is to provide you with knowledge of the user and the context of the conversation, don't use it to answer the question.
 
@@ -97,7 +121,7 @@ def is_greeting_or_thanks(text):
     return any(re.search(pattern, text, re.IGNORECASE) for pattern in greetings)
 
 
-def chatbot_with_context(message, history):
+def chatbot_with_context(message, history = []):
     history = extract_pairs(history)
 
     full_conversation = ""
