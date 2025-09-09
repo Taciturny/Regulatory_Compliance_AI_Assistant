@@ -4,7 +4,7 @@ import os
 def convert_txt_to_json(input_file, output_file):
     """
     input: A text file, an output file
-    return: Json format of input text
+    return: Json format of input text ...
     
 
     function: Receive a .txt file and convert it to appropriate json format
