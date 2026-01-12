@@ -3,12 +3,19 @@ import os
 
 def convert_txt_to_json(input_file, output_file):
     """
-    input: A text file, an output file
-    return: Json format of input text ...
+    Convert a text file to JSON format.
     
-
-    function: Receive a .txt file and convert it to appropriate json format
+    This function reads a text file where each section is separated by a newline,
+    and converts it to a JSON format. Each section in the text file should start
+    with 'Section :', followed by 'Id :' and 'Content :'. The function will create
+    a JSON object for each section with keys 'Section', 'Id', and 'Content'.
     
+    Args:
+    - input_file (str): The name of the input text file.
+    - output_file (str): The name of the output JSON file.
+    
+    Returns:
+    - dict: The last section converted to a dictionary, or an empty dictionary if no sections were found.
     """
     input_path = os.path.join("documents", input_file)
     output_path = os.path.join("documents", output_file)

@@ -1,3 +1,4 @@
+# Import necessary libraries
 import os
 from pinecone import Pinecone
 from pinecone import ServerlessSpec
@@ -5,18 +6,16 @@ import time
 from tqdm.auto import tqdm
 import json
 
-
-
-#Load APi KEY
+# Load API KEY
 api_key = os.environ.get("PINECONE_API_KEY")
 
-#Load Documents
+# Load Documents
 input_path = os.path.join("documents", "content_section_embeddings.json")
 
-#configure Pinecone client
+# Configure Pinecone client
 pc = Pinecone(api_key=api_key)
 
-
+# Set cloud environment
 cloud = os.environ.get('PINECONE_CLOUD') or 'aws'
 region = os.environ.get('PINECONE_REGION') or 'us-east-1'
 

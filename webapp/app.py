@@ -1,8 +1,9 @@
+# Import necessary libraries
 from flask import Flask, render_template, request, jsonify, session
 from gradio_client import Client
 from flask_session import Session
 
-
+# Initialize Flask application
 app = Flask(__name__)
 app.secret_key = '6yygoypu87tyvtir8-8'
 app.config['SESSION_TYPE'] = 'filesystem'
@@ -10,11 +11,12 @@ Session(app)
 
 @app.route('/')
 def index():
+    # Render the chat interface
     return render_template('chat.html')
 
 @app.route('/chat', methods=['POST'])
 def chat():
-
+    # Handle chat requests
     if 'history' not in session:
         session['history'] = []
 
