@@ -1,10 +1,10 @@
+# Import necessary libraries
 import json
 import os
 from sentence_transformers import SentenceTransformer
 
 
 def generate_embeddings(json_file, output_file, model_name="all-MiniLM-L6-v2"):
-
     """
     INPUT:  json_file The Text data Without Embedding
             output_file The Text file to be created including embeddings
@@ -14,7 +14,6 @@ def generate_embeddings(json_file, output_file, model_name="all-MiniLM-L6-v2"):
 
             Function: Concatenate both section and question and return a json file 
             Including their embeddings
-    
     """
     model = SentenceTransformer(model_name)
     input_path = os.path.join("documents", json_file)

@@ -1,19 +1,20 @@
+# Import necessary libraries
 import os
 from pinecone import Pinecone
 from pinecone import ServerlessSpec
 from sentence_transformers import SentenceTransformer
 
-
-#Load APi KEY
+# Load API KEY
 api_key = os.environ.get("PINECONE_API_KEY")
 
-#configure Pinecone client
+# Configure Pinecone client
 pc = Pinecone(api_key=api_key)
 
-
+# Set cloud and region
 cloud = os.environ.get('PINECONE_CLOUD') or 'aws'
 region = os.environ.get('PINECONE_REGION') or 'us-east-1'
 
+# Define serverless specification
 spec = ServerlessSpec(cloud=cloud, region=region)
 index_name = 'regulatoryai' 
 model_name="all-MiniLM-L6-v2"
