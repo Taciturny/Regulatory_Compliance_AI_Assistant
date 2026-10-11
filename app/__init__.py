@@ -1,0 +1,1 @@
+"""Nigerian data protection assistant."""

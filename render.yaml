@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: civicdata
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/status
+    envVars:
+      - key: LLM_API_KEY
+        sync: false
+      - key: LLM_MODEL
+        value: gemini-flash-latest
+      - key: COHERE_API_KEY
+        sync: false
+      - key: COHERE_MODEL
+        value: command-a-plus-05-2026
+      - key: PINECONE_API_KEY
+        sync: false
+      - key: PINECONE_INDEX_NAME
+        value: regulatoryai
+      - key: PINECONE_CLOUD
+        value: aws
+      - key: PINECONE_REGION
+        value: us-east-1
+      - key: CHAT_REQUESTS_PER_MINUTE
+        value: "10"
+      - key: MAX_CONCURRENT_CHAT_REQUESTS
+        value: "3"

@@ -1,8 +1,19 @@
 .venv
 .env
 __pycache__/
-*.pyc   
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+dist/
+build/
+data/*.sqlite3
+data/*.sqlite3-shm
+data/*.sqlite3-wal
+flask_session/
 *.pyo
 *.pyd
 certificate.pem 
 
+/.codex-runtime-packages/
+/snapshots/

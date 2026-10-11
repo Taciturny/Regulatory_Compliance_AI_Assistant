@@ -1,351 +1,78 @@
-# Regulatory Compliance AI Assistant
+# CivicData — Nigerian Data Protection Assistant
 
-An intelligent AI-powered assistant designed to help users navigate complex data protection laws and privacy regulations, with a specialized focus on the **Nigerian Data Protection Act (NDPA)**. This tool leverages state-of-the-art NLP models and vector databases to provide accurate, context-aware legal guidance.
+CivicData helps people understand Nigerian data protection rights and review pasted privacy notices or terms for clauses that may deserve attention. It is an informational assistant, not a lawyer, and does not provide legal advice or definitive legal determinations.
 
-## 📋 Table of Contents
+## Current architecture
 
-- [Overview](#overview)
-- [Features](#features)
-- [Technology Stack](#technology-stack)
-- [Project Structure](#project-structure)
-- [Installation](#installation)
-- [Configuration](#configuration)
-- [Usage](#usage)
-- [Project Components](#project-components)
-- [API Documentation](#api-documentation)
-- [License](#license)
+- **FastAPI + Uvicorn** serves the application.
+- **RAG** retrieves relevant provisions from the NDPA 2023 and GAID 2025 corpus using Pinecone vector search. Pinecone Inference (`llama-text-embed-v2`) creates passage and query embeddings. Gemini generates a plain-language, cited response from the retrieved passages; Cohere Chat is used as a backup if Gemini errors, times out, or returns an unusable response.
+- **No conversation database**: pasted terms/questions are not written to CivicData storage or indexed. Text is sent to Pinecone for retrieval and to Gemini; if Gemini fails, the same prompt and retrieved legal passages are sent to Cohere for generation. Avoid entering confidential or identifying details; review both providers' current privacy terms before public launch.
+- **Defensive defaults**: server-side secrets, input size limits, security headers, no public API docs, a shared request cap, and bounded concurrent AI requests.
 
-## 🎯 Overview
+## Run locally
 
-The Regulatory Compliance AI Assistant is designed to assist legal professionals, businesses, and individuals in understanding and complying with data protection regulations. The system provides intelligent responses to questions about privacy laws, summarizes legal documents, analyzes privacy policies, and identifies potential violations of user rights under the Nigerian Data Protection Act.
+Requires Python 3.10 or newer, a Google AI Studio API key, and a Pinecone account/API key. Defaults preserve the original project index name `regulatoryai`, AWS cloud, and `us-east-1` region. The reset command recreates that index for Pinecone Inference embeddings at 1024 dimensions and cosine similarity; the old 384-dimensional dot-product vectors are not compatible and are regenerated.
 
-### Key Capabilities:
-- **Legal Question Answering**: Get accurate answers to questions about data protection laws and regulations
-- **Document Summarization**: Automatically summarize sections of the NDPA and other legal documents
-- **Privacy Policy Analysis**: Analyze privacy policies and identify violations of user rights
-- **Compliance Assistance**: Receive guidance on compliance with the Nigerian Data Protection Act
-
-## ✨ Features
-
-### Core Features:
-1. **Intelligent Query Processing**
-   - Natural language understanding powered by advanced NLP models
-   - Context-aware responses based on indexed legal documents
-   - Multi-turn conversation support
-
-2. **Vector-Based Search**
-   - Semantic search using embeddings for accurate document retrieval
-   - Pinecone-powered indexing for fast and scalable search
-   - Support for complex legal document queries
-
-3. **Legal Document Processing**
-   - Automatic conversion of text documents to structured JSON format
-   - Embedding generation for semantic understanding
-   - Support for multiple document types
-
-4. **Web Interface**
-   - User-friendly chat interface for easy interaction
-   - Session management for maintaining conversation history
-   - Real-time response streaming
-
-5. **Multi-Tool Integration**
-   - Cohere API for advanced NLP capabilities
-   - SentenceTransformers for document embeddings
-   - Gradio for model inference
-
-## 🛠️ Technology Stack
-
-### Backend:
-- **Python 3.8+**: Core programming language
-- **Flask**: Web framework for application server
-- **Pinecone**: Vector database for semantic search and indexing
-- **Cohere**: API for advanced NLP and text generation
-- **SentenceTransformers**: Pre-trained models for generating embeddings
-- **Gradio Client**: For interfacing with AI models
-
-### Frontend:
-- **HTML5**: Markup structure
-- **CSS3**: Styling and layout
-- **JavaScript**: Client-side interactivity
-
-### Infrastructure:
-- **Flask Session**: For managing user sessions and conversation history
-
-## 📁 Project Structure
-
-```
-Regulatory_Compliance_AI_Assistant/
-├── README.md                          # Project documentation (this file)
-├── LICENSE                            # Project license
-├── bash.sh                            # Shell script for running the application
-├── chatweb.html                       # Standalone chat interface HTML
-├── documents/                         # Directory containing legal documents
-│   ├── content_section_embeddings.json # Embeddings of document content
-│   ├── ndpa.json                      # Nigerian Data Protection Act in JSON format
-│   ├── ndpa.txt                       # Nigerian Data Protection Act in text format
-│   └── output.json                    # Processed output data
-├── flask_session/                     # Flask session storage
-│   └── [session files...]             # Individual session files
-├── src/                               # Source code directory
-│   ├── __init__.py                    # Package initialization
-│   ├── agent.py                       # Main AI agent logic and prompt templates
-│   ├── create_embeddings.py           # Script to generate embeddings from JSON data
-│   ├── create_json.py                 # Utility to convert text files to JSON
-│   ├── indexing.py                    # Pinecone indexing and configuration
-│   ├── test_retrieval.py              # Testing script for retrieval functionality
-│   └── create_json.py                 # JSON conversion utilities
-└── webapp/                            # Flask web application
-    ├── __init__.py                    # Package initialization
-    ├── app.py                         # Main Flask application
-    ├── static/                        # Static assets
-    │   ├── css/
-    │   │   └── style.css              # Application styling
-    │   └── js/
-    │       └── chat.js                # Client-side chat logic
-    └── templates/                     # HTML templates
-        └── chat.html                  # Chat interface template
+```powershell
+py -m venv .venv
+.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+Copy-Item .env.example .env
 ```
 
-## 🚀 Installation
+Add your keys to `.env` (never commit it):
 
-### Prerequisites:
-- Python 3.8 or higher
-- pip (Python package manager)
-- API keys for:
-  - Pinecone (vector database)
-  - Cohere (NLP API)
-
-### Step 1: Clone the Repository
-```bash
-git clone <repository-url>
-cd Regulatory_Compliance_AI_Assistant
-```
-
-### Step 2: Create Virtual Environment (Optional but Recommended)
-```bash
-python -m venv venv
-# On Windows:
-venv\Scripts\activate
-# On macOS/Linux:
-source venv/bin/activate
-```
-
-### Step 3: Install Dependencies
-```bash
-pip install -r requirements.txt
-```
-
-Required packages:
-- `flask==2.3.0`
-- `flask-session==0.5.0`
-- `pinecone-client==2.2.0`
-- `sentence-transformers==2.2.0`
-- `cohere==4.0.0`
-- `gradio-client==0.2.0`
-- `python-dotenv==1.0.0`
-
-### Step 4: Set Up Environment Variables
-Create a `.env` file in the project root:
-```
+```dotenv
+LLM_API_KEY=your_google_ai_studio_api_key
+LLM_MODEL=gemini-flash-latest
+COHERE_API_KEY=your_cohere_api_key
+COHERE_MODEL=command-a-plus-05-2026
 PINECONE_API_KEY=your_pinecone_api_key
+PINECONE_INDEX_NAME=regulatoryai
 PINECONE_CLOUD=aws
 PINECONE_REGION=us-east-1
-COHERE_API_KEY=your_cohere_api_key
-FLASK_SECRET_KEY=your_secret_key
 ```
 
-## ⚙️ Configuration
+The corpus validator checks the numbered source coverage without contacting a service:
 
-### Pinecone Setup:
-1. Create a Pinecone account at https://www.pinecone.io
-2. Create a serverless index named `regulatoryai`
-3. Add your API key to the `.env` file
-
-### Cohere Setup:
-1. Create a Cohere account at https://cohere.com
-2. Generate an API key
-3. Add your API key to the `.env` file
-
-### Model Configuration:
-The project uses `all-MiniLM-L6-v2` as the default SentenceTransformer model for generating embeddings. To use a different model, modify the `model_name` parameter in relevant files.
-
-## 📖 Usage
-
-### Running the Application:
-
-#### Option 1: Using Flask Development Server
-```bash
-cd webapp
-python app.py
-```
-The application will start at `http://localhost:5000`
-
-#### Option 2: Using the Bash Script
-```bash
-bash bash.sh
+```powershell
+python -c "from pathlib import Path; from app.legal_corpus import validate_legal_corpus; print(validate_legal_corpus(Path('documents')))"
 ```
 
-### Using the Chat Interface:
-1. Open your web browser and navigate to `http://localhost:5000`
-2. Type your question about data protection laws or regulations
-3. The AI assistant will provide a comprehensive response
-4. Your conversation history is automatically maintained
+To replace the entire existing Pinecone index and recreate every embedding, run `python -m app.index_legal_sources --reset-index`. This permanently deletes all data in the configured Pinecone index before recreating it. To preserve the index container and replace only CivicData's vectors, run `python -m app.index_legal_sources --rebuild`. Then run `python -m uvicorn app.main:app --host 127.0.0.1 --port 8000` and open <http://127.0.0.1:8000>. Do not run the index builder at every server start. Embeddings are generated from `title + content`; both fields are stored in Pinecone metadata and sent to the answer model as retrieved law excerpts.
 
-### Command Line Usage:
+## Deploy
 
-#### Generate Embeddings:
-```bash
-python src/create_embeddings.py
+The repository includes a Render Blueprint in `render.yaml`. Connect the repository in Render and create the web service. Set `LLM_API_KEY`, `COHERE_API_KEY` (for backup generation), and `PINECONE_API_KEY` as Render secrets. Before deploying, run `python -m app.index_legal_sources --reset-index` from a trusted local environment with the same Pinecone key, index name, cloud and region. The web process does not rebuild the index at startup.
+
+Render's free service may sleep when idle and has limited CPU and memory; it is suitable for a small demo, not reliable high-concurrency production. Gemini and Pinecone free quotas can change and are not guaranteed capacity. The default app-side cap of 10 requests/minute and 3 simultaneous AI requests is conservative; tune `CHAT_REQUESTS_PER_MINUTE` and `MAX_CONCURRENT_CHAT_REQUESTS` to observed provider quotas. Requests over the cap receive HTTP 429. Do not advertise support for 300 concurrent users until load-tested against the chosen host and provider quotas.
+
+For a public service, use always-on managed hosting, HTTPS, monitoring, legal-corpus change control, abuse protection, and a reviewed privacy notice. Free Gemini tiers may have data-use terms unsuitable for sensitive user information.
+
+## Model, privacy and security
+
+Gemini and Cohere are called through their native REST APIs. Gemini is always tried first; Cohere is called only when Gemini is unavailable or returns an unusable response. Keep `LLM_API_KEY`, `COHERE_API_KEY`, and `PINECONE_API_KEY` only in `.env` locally or the hosting provider's secret manager. The Gemini key previously pasted into a chat should be revoked and replaced before public deployment.
+
+Pasted text is sent to Pinecone for query embedding and to Gemini for answer generation. If Gemini fails, the prompt and retrieved legal passages are sent to Cohere instead. CivicData does not save pasted text. Avoid entering confidential or identifying details. The server enforces message size limits and security headers; AI findings are issues to investigate, not legal conclusions. Have a qualified Nigerian privacy professional review important decisions.
+
+## Legal corpus
+
+The indexed corpus includes all **65 NDPA sections**, all **52 GAID articles**, and all **10 GAID schedules**. It also includes a separately labeled NDPC DPO-training page to answer career-path questions; those cohort admission criteria are guidance for that programme, not statutory qualification rules. The original NDPA PDF, the complete official 117-page GAID PDF, extracted GAID text, and structured records are in `documents/`. The corpus validator enforces sequence completeness and checks key DPO provisions before indexing. Confirm sources against current NDPC publications when updating; retrieval still cannot guarantee every issue is found or that an answer is legally correct.
+
+Primary sources: [Nigeria Data Protection Act 2023 — NDPC](https://www.ndpc.gov.ng/ndp-act-2023/) · [NDP Act GAID 2025 — NDPC](https://ndpc.gov.ng/wp-content/uploads/2025/07/NDP-ACT-GAID-2025-MARCH-20TH.pdf)
+
+## Project layout
+
+```text
+app/main.py                 FastAPI, Gemini, request limits and security headers
+app/vector_store.py         Pinecone embedding and semantic retrieval
+app/index_legal_sources.py  One-time Pinecone corpus indexing command
+app/legal_corpus.py         Offline source-coverage checks before indexing
+app/templates/index.html
+app/static/css/app.css
+app/static/js/app.js
+documents/                   Complete NDPA / GAID text, PDFs and structured corpus
+render.yaml                  Render deployment blueprint
 ```
 
-#### Convert Documents to JSON:
-```bash
-python src/create_json.py
-```
-
-#### Index Documents:
-```bash
-python src/indexing.py
-```
-
-#### Test Retrieval:
-```bash
-python src/test_retrieval.py
-```
-
-## 🔧 Project Components
-
-### 1. **agent.py**
-- **Purpose**: Core AI agent logic and prompt templates
-- **Key Functions**: 
-  - Initializes Cohere API client
-  - Defines the system prompt for the AI assistant
-  - Handles conversation flow
-- **Configuration**: Contains the expert legal assistant prompt template
-
-### 2. **create_embeddings.py**
-- **Purpose**: Generates vector embeddings for document content
-- **Key Functions**: 
-  - `generate_embeddings(json_file, output_file, model_name)`: Creates embeddings from text data
-- **Output**: JSON file containing document content with embeddings
-
-### 3. **create_json.py**
-- **Purpose**: Converts text documents to structured JSON format
-- **Key Functions**: 
-  - `convert_txt_to_json(input_file, output_file)`: Transforms .txt files to JSON
-- **Usage**: Preprocessing legal documents before embedding generation
-
-### 4. **indexing.py**
-- **Purpose**: Manages Pinecone vector database indexing
-- **Key Functions**:
-  - Initializes Pinecone client
-  - Creates serverless index
-  - Loads and indexes documents
-- **Configuration**: Handles cloud provider and region settings
-
-### 5. **test_retrieval.py**
-- **Purpose**: Tests the retrieval system with queries
-- **Key Functions**: 
-  - Initializes SentenceTransformer model
-  - Configures Pinecone client
-  - Tests query-to-embedding conversion and retrieval
-- **Usage**: Validates the indexing and retrieval pipeline
-
-### 6. **app.py** (Flask Application)
-- **Purpose**: Main web application server
-- **Key Routes**:
-  - `/`: Renders the chat interface
-  - `/chat`: Handles user messages and returns AI responses
-- **Session Management**: Maintains conversation history per user
-
-## 🔌 API Documentation
-
-### Chat Endpoint
-
-**Endpoint**: `POST /chat`
-
-**Request Body**:
-```json
-{
-  "message": "What are my rights under the NDPA?",
-  "conversation_id": "optional_id"
-}
-```
-
-**Response**:
-```json
-{
-  "response": "According to the Nigerian Data Protection Act (NDPA)...",
-  "conversation_history": [...],
-  "status": "success"
-}
-```
-
-**Status Codes**:
-- `200`: Successful response
-- `400`: Invalid request
-- `500`: Server error
-
-## 📝 Document Format
-
-### Supported Input Formats:
-- **Text Files (.txt)**: Plain text documents with sections separated by headers
-- **JSON Files (.json)**: Structured JSON with sections and content
-
-### Document Structure:
-```json
-{
-  "sections": [
-    {
-      "title": "Section Title",
-      "content": "Section content and details",
-      "questions": ["Question 1", "Question 2"]
-    }
-  ]
-}
-```
-
-## 🔍 Troubleshooting
-
-### Common Issues:
-
-1. **Pinecone Connection Error**
-   - Verify API key in `.env` file
-   - Check internet connection
-   - Ensure index exists in Pinecone account
-
-2. **Model Loading Error**
-   - Ensure SentenceTransformers is properly installed
-   - First run may take time to download model
-   - Check available disk space
-
-3. **Session Not Persisting**
-   - Verify `flask_session` directory exists
-   - Check Flask session configuration in `app.py`
-
-4. **Embedding Generation Issues**
-   - Ensure input JSON file exists in `documents/` directory
-   - Verify JSON format is correct
-
-## 🤝 Contributing
-
-Contributions are welcome! Please follow these guidelines:
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/YourFeature`)
-3. Commit changes (`git commit -m 'Add YourFeature'`)
-4. Push to branch (`git push origin feature/YourFeature`)
-5. Open a Pull Request
-
-## 📄 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## 👥 Support & Contact
-
-For questions or support, please open an issue on the GitHub repository or contact the development team.
-
----
-
-**Last Updated**: January 12, 2026
-
-**Version**: 1.0.0
+See [LICENSE](LICENSE).
