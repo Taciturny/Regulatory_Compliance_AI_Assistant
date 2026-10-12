@@ -238,7 +238,9 @@ class LegalVectorStore:
         for (source, reference), chunks in ordered_groups:
             chunks.sort(key=lambda row: row[0])
             # Preserve adjacent chunks within a provision; later chunks can contain a qualification or exception.
-            text = "\n".join(str(row[1].get("content", "")) for row in chunks[:3])
+            # A pair of adjacent chunks retains relevant qualifications while limiting
+            # the context sent to the LLM, especially when reviewing pasted contracts.
+            text = "\n".join(str(row[1].get("content", "")) for row in chunks[:2])
             url = str(chunks[0][1].get("url", ""))
             passages.append(Passage(source, reference, text, url))
             if len(passages) >= limit:

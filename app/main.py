@@ -35,6 +35,7 @@ MODES = {"ask", "review"}
 GEMINI_API_ROOT = "https://generativelanguage.googleapis.com/v1beta/models"
 COHERE_API_URL = "https://api.cohere.com/v2/chat"
 COHERE_DEFAULT_MODEL = "command-a-plus-05-2026"
+MAX_OUTPUT_TOKENS = max(512, min(4096, int(os.getenv("LLM_MAX_OUTPUT_TOKENS", "2048"))))
 CHAT_REQUESTS_PER_MINUTE = max(1, int(os.getenv("CHAT_REQUESTS_PER_MINUTE", "10")))
 MAX_CONCURRENT_CHAT_REQUESTS = max(1, int(os.getenv("MAX_CONCURRENT_CHAT_REQUESTS", "3")))
 _rate_lock = threading.Lock()
@@ -99,7 +100,7 @@ def _generate_gemini(api_key: str, model: str, system: str, prompt: str) -> tupl
     payload = {
         "systemInstruction": {"parts": [{"text": system}]},
         "contents": [{"role": "user", "parts": [{"text": prompt}]}],
-        "generationConfig": {"temperature": 0.2, "maxOutputTokens": 1200},
+        "generationConfig": {"temperature": 0.2, "maxOutputTokens": MAX_OUTPUT_TOKENS},
     }
     request = urllib.request.Request(
         f"{GEMINI_API_ROOT}/{model}:generateContent",
@@ -119,7 +120,7 @@ def _generate_cohere(api_key: str, model: str, system: str, prompt: str) -> tupl
             {"role": "user", "content": prompt},
         ],
         "temperature": 0.2,
-        "max_tokens": 1200,
+        "max_tokens": MAX_OUTPUT_TOKENS,
     }
     request = urllib.request.Request(
         COHERE_API_URL,
@@ -134,8 +135,10 @@ def _generate_cohere(api_key: str, model: str, system: str, prompt: str) -> tupl
         if isinstance(part, dict) and part.get("type") == "text" and part.get("text")
     ).strip()
     finish_reason = result.get("finish_reason", "")
-    if not answer or finish_reason == "MAX_TOKENS":
-        raise ProviderFailure("Cohere", "empty or truncated response")
+    if finish_reason == "MAX_TOKENS":
+        raise ProviderFailure("Cohere", "output token or context limit")
+    if not answer:
+        raise ProviderFailure("Cohere", "empty response")
     return answer, finish_reason
 
 
@@ -167,7 +170,11 @@ def generate_answer(system: str, prompt: str) -> tuple[str, str, str]:
         )
     raise HTTPException(
         status_code=503,
-        detail="AI answer generation is temporarily unavailable. Please try again shortly.",
+        detail=(
+            "The AI services could not complete this review. Please try again with only the privacy, consent, or data-sharing sections."
+            if prompt.startswith("Review this pasted text")
+            else "The AI services could not complete an answer right now. Please try again shortly."
+        ),
     )
 
 
@@ -272,7 +279,7 @@ def chat(payload: ChatRequest):
         raise HTTPException(status_code=429, detail="CivicData is handling several requests right now. Please try again shortly.", headers={"Retry-After": "10"})
 
     try:
-        passages = retriever.search(message, limit=8)
+        passages = retriever.search(message, limit=5 if payload.mode == "review" else 8)
     except RetrievalError as exc:
         logger.warning("Legal vector retrieval unavailable (%s)", str(exc))
         _chat_slots.release()
