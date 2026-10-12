@@ -265,6 +265,11 @@ def chat(payload: ChatRequest):
         raise HTTPException(status_code=422, detail="Enter a question or paste the clauses you want reviewed.")
     if payload.mode not in MODES:
         raise HTTPException(status_code=422, detail="Choose Ask or Review terms.")
+    if payload.mode == "review":
+        raise HTTPException(
+            status_code=410,
+            detail="Terms review is coming soon. You can ask questions about Nigerian data protection in chat for now.",
+        )
     if len(message) > MAX_MESSAGE_CHARS:
         raise HTTPException(status_code=413, detail=f"Please keep your message under {MAX_MESSAGE_CHARS:,} characters.")
 

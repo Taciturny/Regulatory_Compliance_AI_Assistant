@@ -102,19 +102,11 @@ function renderMarkdown(markdown) {
   answerText.innerHTML = output.join('');
 }
 
-const modes = {
-  ask: {
-    description: 'Ask anything about your rights and how organisations should handle your personal data.',
-    placeholder: 'Type your question here…', label: 'Your question', hint: 'Be as specific as you like. Please leave out names, account numbers, or other personal details.', button: 'Get an answer',
-    examples: ['What are my data rights?', 'Can my data be shared?', 'How does consent work?'],
-    prompts: ['What rights do I have if a company has my personal information?', 'Can an organisation share my personal data with another company?', 'What does the Nigeria Data Protection Act say about consent?'],
-  },
-  review: {
-    description: 'Paste the clause or section you are unsure about. We’ll explain possible concerns and point to the relevant law.',
-    placeholder: 'Paste a privacy clause or terms and conditions here…', label: 'Terms or privacy clause', hint: 'Paste only the relevant wording. Remove names, email addresses, and other personal details first.', button: 'Review these terms',
-    examples: ['Review this privacy clause', 'Check these consent terms', 'Look at this data sharing provision'],
-    prompts: ['We may collect and use your personal information for any purpose we consider appropriate.', 'By using this service, you agree that we may share your information with our partners.', 'We retain personal data indefinitely, even after your account is closed.'],
-  },
+const askMode = {
+  description: 'Ask anything about your rights and how organisations should handle your personal data.',
+  placeholder: 'Type your question here…', label: 'Your question', hint: 'Be as specific as you like. Please leave out names, account numbers, or other personal details.', button: 'Get an answer',
+  examples: ['What are my data rights?', 'Can my data be shared?', 'How does consent work?'],
+  prompts: ['What rights do I have if a company has my personal information?', 'Can an organisation share my personal data with another company?', 'What does the Nigeria Data Protection Act say about consent?'],
 };
 
 function setMode(nextMode) {
@@ -124,7 +116,7 @@ function setMode(nextMode) {
     tab.classList.toggle('active', active);
     tab.setAttribute('aria-selected', String(active));
   });
-  const copy = modes[mode];
+  const copy = askMode;
   description.textContent = copy.description;
   input.placeholder = copy.placeholder;
   inputLabel.textContent = copy.label;
@@ -185,7 +177,7 @@ form.addEventListener('submit', async (event) => {
     if (!response.ok) throw new Error(data.detail || 'Could not generate an answer. Please try again.');
     answerMarkdown = data.answer;
     renderMarkdown(answerMarkdown);
-    const modeLabel = mode === 'review' ? 'Terms review' : 'Question answered';
+    const modeLabel = 'Question answered';
     document.querySelector('#answer-mode').textContent = data.provider === 'cohere'
       ? `${modeLabel} · Cohere backup`
       : `${modeLabel} · Gemini`;
